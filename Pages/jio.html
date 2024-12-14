@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Stock Details</title>
+		<style>
+			:root {
+				--gap-size: 32px;
+				box-sizing: border-box;
+				font-family: -apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, Ubuntu, sans-serif;
+				color: #000;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				padding: 0;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				background: #fff;
+			}
+
+			header, footer {
+				display: flex;
+				width: 100%;
+				align-items: center;
+				background: rgba(0, 0, 0, 0.05);
+				gap: 12px;
+			}
+
+			header {
+				justify-content: space-between;
+				padding: 0 var(--gap-size);
+				gap: calc(var(--gap-size) * 2);
+				box-shadow: rgba(0, 0, 0, 0.05) 0 2px 6px 0;
+				flex-direction: row;
+				z-index: 1;
+			}
+
+			header #site-logo {
+				font-weight: 600;
+				font-size: 32px;
+				padding: 16px;
+				background: var(--18-promo-gradient-02, linear-gradient(90deg, #00bce5 0%, #2962ff 100%));
+				-webkit-text-fill-color: transparent;
+				-webkit-background-clip: text;
+				background-clip: text;
+			}
+
+			button {
+				background-color: #4caf50;
+				color: white;
+				padding: 14px 20px;
+				border: none;
+				border-radius: 8px;
+				cursor: pointer;
+				font-size: 16px;
+				transition: all 0.3s ease;
+			}
+
+			button:hover {
+				background-color: #45a049;
+				transform: scale(1.05);
+			}
+
+			button:focus {
+				outline: none;
+				box-shadow: 0 0 10px rgba(0, 128, 0, 0.5);
+			}
+
+			footer {
+				flex-direction: column;
+				padding: calc(var(--gap-size) * 0.5) var(--gap-size);
+				margin-top: var(--gap-size);
+				border-top: solid 2px rgba(0, 0, 0, 0.1);
+				justify-content: center;
+			}
+
+			footer p, #powered-by-tv p {
+				margin: 0;
+				font-size: 12px;
+				color: rgba(0, 0, 0, 0.6);
+			}
+
+			main {
+				display: grid;
+				width: 100%;
+				padding: 0 calc(var(--gap-size) * 0.5);
+				max-width: 960px;
+				grid-template-columns: 1fr 1fr;
+				grid-gap: var(--gap-size);
+			}
+
+			#symbol-info, #advanced-chart, #company-profile, #fundamental-data {
+				grid-column: span 2;
+			}
+
+			#technical-analysis, #top-stories, #powered-by-tv {
+				grid-column: span 1;
+			}
+
+			#ticker-tape {
+				width: 100%;
+				margin-bottom: var(--gap-size);
+			}
+
+			#advanced-chart {
+				height: 500px;
+			}
+
+			#company-profile {
+				height: 390px;
+			}
+
+			#fundamental-data {
+				height: 490px;
+			}
+
+			#technical-analysis, #top-stories {
+				height: 425px;
+			}
+
+			#powered-by-tv {
+				display: flex;
+				background: #f8f9fd;
+				border: solid 1px #e0e3eb;
+				text-align: justify;
+				flex-direction: column;
+				gap: 8px;
+				font-size: 14px;
+				padding: 16px;
+				border-radius: 6px;
+			}
+
+			#powered-by-tv a, #powered-by-tv a:visited {
+				color: #2962ff;
+			}
+
+			@media (max-width: 800px) {
+				main > section, .span-full-grid, #technical-analysis, #top-stories, #powered-by-tv {
+					grid-column: span 2;
+				}
+			}
+
+			/* Chatbot Style */
+			#chatbot-container {
+				position: fixed;
+				bottom: 10px;
+				left: 10px;
+				width: 300px;
+				height: 400px;
+				background-color: #fff;
+				border: 2px solid #2962ff;
+				border-radius: 10px;
+				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+				z-index: 9999;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+				transition: all 0.3s ease;
+			}
+
+			#chatbot-container iframe {
+				width: 100%;
+				height: 100%;
+				border: none;
+			}
+
+			#chatbot-header {
+				background-color: #2962ff;
+				color: white;
+				padding: 10px;
+				text-align: center;
+				cursor: pointer;
+				font-weight: bold;
+			}
+
+			#minimize-btn {
+				position: absolute;
+				top: 5px;
+				right: 5px;
+				background-color: #ff4747;
+				color: white;
+				border: none;
+				border-radius: 50%;
+				width: 20px;
+				height: 20px;
+				cursor: pointer;
+				font-size: 12px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			#chatbot-container.minimized {
+				height: 40px;
+				width: 40px;
+				border-radius: 50%;
+			}
+
+			#chatbot-container.minimized iframe {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<a id="site-logo" href="#">Stock.Pro</a>
+			<button onclick="window.open('http://localhost:8000/combined_chart_with_trends.html', '_blank');">REAL TIME Simulation</button>
+			<button onclick="window.location.href='future.html';">Future Predictions</button>
+			<button onclick="window.location.href='sentiment.html';">Sentiment Analysis</button>
+		</header>
+		<nav id="ticker-tape">
+			<!-- TradingView Widget BEGIN -->
+			<div class="tradingview-widget-container">
+				<div class="tradingview-widget-container__widget"></div>
+				<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+					{
+						"symbols": [
+							{"description": "", "proName": "BSE:INFYS"},
+							{"description": "", "proName": "BSE:ITDCEM"},
+							{"description": "", "proName": "BSE:JIOFIN"},
+							{"description": "", "proName": "BSE:SBICARD"},
+							{"description": "", "proName": "BSE:PGEL"},
+							{"description": "", "proName": "BSE:POWERGRID"},
+							{"description": "", "proName": "BSE:RECLTD"},
+							{"description": "", "proName": "BSE:PFC"},
+							{"description": "", "proName": "BSE:COALINDIA"},
+							{"description": "", "proName": "BSE:ITC"},
+							{"description": "", "proName": "BSE:VSTIND"},
+							{"description": "", "proName": "BSE:GOLDIAM"}
+						],
+						"showSymbolLogo": true,
+						"colorTheme": "light",
+						"isTransparent": false,
+						"displayMode": "adaptive",
+						"locale": "en",
+						"largeChartUrl": "https://www.tradingview.com/widget-docs/tutorials/build-page/demo/"
+					}
+				</script>
+			</div>
+			<!-- TradingView Widget END -->
+		</nav>
+		<main>
+			<section id="symbol-info">
+				<!-- TradingView Widget BEGIN -->
+				<div class="tradingview-widget-container">
+					<div class="tradingview-widget-container__widget"></div>
+					<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-info.js" async>
+						{
+							"symbol": "BSE:JIOFIN",
+							"width": "100%",
+							"locale": "en",
+							"colorTheme": "light",
+							"isTransparent": true
+						}
+					</script>
+				</div>
+				<!-- TradingView Widget END -->
+			</section>
+			<section id="advanced-chart">
+				<!-- TradingView Widget BEGIN -->
+				<div class="tradingview-widget-container" style="height:100%;width:100%">
+					<div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+					<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+						{
+							"autosize": true,
+							"symbol": "BSE:JIOFIN",
+							"interval": "D",
+							"timezone": "Etc/UTC",
+							"theme": "light",
+							"style": "1",
+							"locale": "en",
+							"allow_symbol_change": true,
+							"calendar": false,
+							"support_host": "https://www.tradingview.com"
+						}
+					</script>
+				</div>
+				<!-- TradingView Widget END -->
+			</section>
+			<section id="company-profile">
+				<!-- TradingView Widget BEGIN -->
+				<div class="tradingview-widget-container">
+					<div class="tradingview-widget-container__widget"></div>
+					<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-profile.js" async>
+						{
+							"width": "100%",
+							"height": "100%",
+							"colorTheme": "light",
+							"isTransparent": true,
+							"symbol": "BSE:JIOFIN",
+							"locale": "en"
+						}
+					</script>
+				</div>
+				<!-- TradingView Widget END -->
+			</section>
+			<section id="fundamental-data">
+				<!-- TradingView Widget BEGIN -->
+				<div class="tradingview-widget-container">
+					<div class="tradingview-widget-container__widget"></div>
+					<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-financials.js" async>
+						{
+							"colorTheme": "light",
+							"isTransparent": true,
+							"largeChartUrl": "",
+							"displayMode": "adaptive",
+							"width": "100%",
+							"height": "100%",
+							"symbol": "BSE:JIOFIN",
+							"locale": "en"
+						}
+					</script>
+				</div>
+				<!-- TradingView Widget END -->
+			</section>
+			<section id="technical-analysis">
+				<!-- TradingView Widget BEGIN -->
+				<div class="tradingview-widget-container">
+					<div class="tradingview-widget-container__widget"></div>
+					<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+						{
+							"interval": "15m",
+							"width": "100%",
+							"isTransparent": true,
+							"height": "100%",
+							"symbol": "BSE:JIOFIN",
+							"showIntervalTabs": true,
+							"displayMode": "single",
+							"locale": "en",
+							"colorTheme": "light"
+						}
+					</script>
+				</div>
+				<!-- TradingView Widget END -->
+			</section>
+			<section id="top-stories">
+				<!-- TradingView Widget BEGIN -->
+				<div class="tradingview-widget-container">
+					<div class="tradingview-widget-container__widget"></div>
+					<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+						{
+							"feedMode": "symbol",
+							"symbol": "BSE:JIOFIN",
+							"colorTheme": "light",
+							"isTransparent": true,
+							"height": "100%",
+							"locale": "en"
+						}
+					</script>
+				</div>
+				<!-- TradingView Widget END -->
+			</section>
+			<section id="powered-by-tv">
+				<p></a>.</p>
+			</section>
+		</main>
+		<footer>
+			<p>&copy; 2024 Stock.Pro</p>
+		</footer>
+
+		<!-- Chatbot -->
+		<div id="chatbot-container">
+			<div id="chatbot-header" onclick="toggleChatbot()">Chat with us</div>
+			<button id="minimize-btn" onclick="minimizeChatbot()">-</button>
+			<iframe src="http://localhost:8501" title="Chatbot"></iframe>
+		</div>
+
+		<script>
+			// Function to toggle chatbot visibility
+			function toggleChatbot() {
+				const chatbot = document.getElementById('chatbot-container');
+				chatbot.classList.toggle('minimized');
+			}
+
+			// Function to minimize chatbot
+			function minimizeChatbot() {
+				const chatbot = document.getElementById('chatbot-container');
+				chatbot.classList.toggle('minimized');
+			}
+		</script>
+	</body>
+</html>
